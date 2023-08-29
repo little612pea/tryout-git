@@ -46,6 +46,12 @@ loss2 = loss_func(b, c)
 
 print("Loss using torch.nn.functional.gelu:", loss1.item())
 print("Loss using custom GELU:", loss2.item())
+#这两个损失值应该相等，因为两个GELU实现的功能是一样的
+#但是，由于torch.nn.functional.gelu是基于C++实现的，而custom GELU是基于Python实现的，
+#所以custom GELU的运行速度会比torch.nn.functional.gelu慢很多
+#但是，custom GELU可以通过torch.autograd.Function实现反向传播，
+#而torch.nn.functional.gelu不可以，所以custom GELU可以用于模型的训练
+#而torch.nn.functional.gelu只能用于模型的推理
 
 loss1.backward()
 loss2.backward()
