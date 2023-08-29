@@ -2,30 +2,18 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
+import gelu_cpp
 
 class MyGELUFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input):
         ctx.save_for_backward(input)
-        return 0.5 * input * (1.0 + torch.tanh((math.sqrt(2.0 / math.pi) * (input + 0.044715 * input**3))))
+        return gelu_cpp.forward(input)
 
     @staticmethod
     def backward(ctx, grad_output):
-        sqrt_2_over_pi = math.sqrt(2.0 / math.pi)
-        c = 0.044715
         x = ctx.saved_tensors[0]
-        tanh_param = sqrt_2_over_pi * (x + c * x**3)
-        
-        tanh_value = torch.tanh(tanh_param)
-        exp_term = torch.exp(-0.5 * (x + c * x**3)**2)
-        cdf_term = 0.5 * (1 + torch.erf(x / math.sqrt(2.0)))
-        
-        derivative = 0.5 * (1 + tanh_value) + \
-                    0.5 * x * (1 - tanh_value**2) * (sqrt_2_over_pi) * (1 + c*3 * x**2) * exp_term - \
-                    0.5 * x * (1 + tanh_value) * exp_term * cdf_term
-        
-        return derivative*grad_output
+        return gelu_cpp.backward(grad_output,x)
 
 class MyGELU(nn.Module):
     def forward(self, input):

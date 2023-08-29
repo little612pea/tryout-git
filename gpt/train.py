@@ -6,7 +6,7 @@ from tqdm import tqdm
 from model import GPTLMModel, GPTLMLoss, get_dataloader, get_model_size, get_tflops
 
 # …Ë÷√—µ¡∑≤Œ ˝
-batch_size = 8
+batch_size = 2
 learning_rate = 5e-4
 num_epochs = 10
 
