@@ -1,3 +1,4 @@
+#encoding:utf-8
 from torch.nn import Module
 from torch import nn
 
@@ -6,6 +7,7 @@ class Model(Module):
     def __init__(self):
         super(Model, self).__init__()
         self.conv1 = nn.Conv2d(1, 6, 5)
+        #1，6，5分别表示输入通道数，输出通道数，卷积核大小
         self.relu1 = nn.ReLU()
         self.pool1 = nn.MaxPool2d(2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -26,6 +28,8 @@ class Model(Module):
         y = self.relu2(y)
         y = self.pool2(y)
         y = y.view(y.shape[0], -1)
+        # 此处view操作是为了将y的形状从[b, c, h, w]变为[b, c*h*w]，以便送入全连接层
+        # -1的涵义是自适应，即自动计算此处应填多少
         y = self.fc1(y)
         y = self.relu3(y)
         y = self.fc2(y)

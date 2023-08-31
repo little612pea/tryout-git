@@ -47,10 +47,14 @@ if __name__ == '__main__':
             test_x = test_x.to(device)
             test_label = test_label.to(device)
             predict_y = model(test_x.float()).detach()
+            # detach 方法将 predict_y 从计算图中分离出来，这样就不会影响后面的反向传播
             predict_y = torch.argmax(predict_y, dim=-1)
+            # 使用 argmax 方法求出预测的数字，argmax 方法会返回最大值的索引，dim=-1 表示在最后一个维度上求最大值
+            # 最后一个维度是数字的维度，即每个数字的概率，前一个维度是 batch 的维度
             current_correct_num = predict_y == test_label
             all_correct_num += np.sum(current_correct_num.to('cpu').numpy(), axis=-1)
             all_sample_num += current_correct_num.shape[0]
+            # shape[0] 返回的是矩阵第一维的长度，即有多少个样本
         
         acc = all_correct_num / all_sample_num
         print('accuracy: {:.3f}'.format(acc), flush=True)

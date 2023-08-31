@@ -21,6 +21,7 @@ dataloader = get_dataloader(vocab_size=50257, seq_length=1024, batch_size=batch_
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
+
 # Ñ¡ÔñÓÅ»¯Æ÷
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 

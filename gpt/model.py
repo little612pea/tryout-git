@@ -2,7 +2,6 @@
 import torch
 import torch.nn as nn
 from transformers import GPT2Config, GPT2LMHeadModel
-
 from torch.utils.data import DataLoader, TensorDataset
 from torch.utils.data.sampler import RandomSampler
 from torch.utils.data.distributed import DistributedSampler
@@ -18,6 +17,7 @@ class GPTLMModel(nn.Module):
                  checkpoint=False):
         super().__init__()
         self.checkpoint = checkpoint
+        # checkpoint参数用于控制是否使用梯度检查点，即是否使用梯度累积
         self.config = GPT2Config(n_embd=hidden_size,
                                  n_layer=num_layers,
                                  n_head=num_attention_heads,
@@ -31,7 +31,9 @@ class GPTLMModel(nn.Module):
     def forward(self, input_ids, attention_mask):
         # 只返回模型的预测值，即logits
         return self.model(input_ids=input_ids, attention_mask=attention_mask, use_cache=not self.checkpoint)[0]
-
+        #attention mask是用于掩盖padding的，即将padding的token的注意力权重设置为0，
+        #use_cache是用于控制是否使用缓存，即是否使用缓存的key和value
+        
 class GPTLMLoss(nn.Module):
 
     def __init__(self):
@@ -68,6 +70,7 @@ def get_dataloader(
     pin_memory: bool = True, #是否将数据加载到固定内存中
     use_distributed_sampler: bool = False #是否使用分布式采样器
 ):
+    #这些参数的默认值与GPT-2模型的参数相对应
     ids = torch.randint(vocab_size, (data_size, seq_length))
     #使用torch.randint创建一个随机的数据集ids，
     #其值在词汇表大小范围内，并且具有指定的data_size和seq_length
@@ -89,6 +92,8 @@ def get_dataloader(
 def get_tflops(model_numel, batch_size, seq_len, step_time):
     #计算模型的浮点运算次数（TFLOPs），接受模型的参数数量、批大小、序列长度以及步骤时间作为输入
     return model_numel * batch_size * seq_len * 8 / 1e12 / (step_time + 1e-12)
+    # seq_len是序列长度，batch_size是批大小，model_numel是模型的参数数量，
+    #为什么step_time要加1e-12，是为了防止除数为0，因为step_time可能为0
 
 def get_model_size(model: nn.Module):
     #计算模型的参数数量，接受模型对象作为输入
